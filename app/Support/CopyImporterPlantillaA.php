@@ -9,7 +9,8 @@ class CopyImporterPlantillaA
 {
     public static function importCsvToPlantillaA(string $csvAbsolutePath, int $escenarioId): void
     {
-        $csvAbs = Storage::disk('local')->path($csvAbsolutePath);
+        $csvAbs = Storage::disk('public')->path($csvAbsolutePath);
+        $utf8Path = ConvertUTF8::ensureUtf8($csvAbs);
 
         DB::beginTransaction();
         try {
@@ -19,7 +20,7 @@ class CopyImporterPlantillaA
             // 1) Carga cruda a staging (HEADER si tu CSV tiene encabezado)
             DB::statement("
                 COPY plantilla_a_staging
-                FROM " . DB::getPdo()->quote($csvAbs) . "
+                FROM " . DB::getPdo()->quote($utf8Path) . "
                 WITH (FORMAT csv, HEADER true, DELIMITER ';', QUOTE '\"',
                 ESCAPE '\"',
                 NULL '',
@@ -62,9 +63,9 @@ class CopyImporterPlantillaA
                 COALESCE(ROUND(NULLIF(replace(alumnos, ',', '.'), '')::numeric)::int, 0),
                 COALESCE(ROUND(NULLIF(replace(docentes, ',', '.'), '')::numeric)::int, 0),
 
-                COALESCE(NULLIF(replace(regexp_replace(vias, '[^0-9,.\-]', '', 'g'), ',', '.'),'')::numeric, 0.00),
+                COALESCE(NULLIF(replace(regexp_replace(vias, '[^0-9,.\-]', '', 'g'), ',', '.'),'')::numeric, 0.000),
 
-                COALESCE(NULLIF(replace(regexp_replace(upper(superficie_agricola), '[^0-9E+,\.-]', '', 'g'),',', '.'),'')::numeric, 0.00),
+                COALESCE(NULLIF(replace(regexp_replace(upper(superficie_agricola), '[^0-9E+,\.-]', '', 'g'),',', '.'),'')::numeric, 0.000),
 
                 COALESCE(ROUND(NULLIF(replace(pob_5, ',', '.'), '')::numeric)::int, 0),
                 COALESCE(ROUND(NULLIF(replace(pob_60, ',', '.'), '')::numeric)::int, 0),
@@ -78,15 +79,15 @@ class CopyImporterPlantillaA
                 COALESCE(ROUND(NULLIF(replace(viv_tipo5, ',', '.'), '')::numeric)::int, 0),
                 COALESCE(ROUND(NULLIF(replace(hogares, ',', '.'), '')::numeric)::int, 0),
 
-                COALESCE(NULLIF(replace(regexp_replace(sa_riego, '[^0-9,.\-]', '', 'g'), ',', '.'),'')::numeric, 0.00),
+                COALESCE(NULLIF(replace(regexp_replace(sa_riego, '[^0-9,.\-]', '', 'g'), ',', '.'),'')::numeric, 0.000),
 
-                COALESCE(NULLIF(replace(regexp_replace(sa_secano, '[^0-9,.\-]', '', 'g'), ',', '.'),'')::numeric, 0.00),
+                COALESCE(NULLIF(replace(regexp_replace(sa_secano, '[^0-9,.\-]', '', 'g'), ',', '.'),'')::numeric, 0.000),
 
                 COALESCE(ROUND(NULLIF(replace(prod_agropecuarios, ',', '.'), '')::numeric)::int, 0),
 
-                COALESCE(NULLIF(replace(regexp_replace(prod_agropecuarios_65, '[^0-9,.\-]', '', 'g'), ',', '.'),'')::numeric, 0.00),
+                COALESCE(NULLIF(replace(regexp_replace(prod_agropecuarios_65, '[^0-9,.\-]', '', 'g'), ',', '.'),'')::numeric, 0.000),
 
-                COALESCE(NULLIF(replace(regexp_replace(superficie_de_pastos, '[^0-9,.\-]', '', 'g'), ',', '.'),'')::numeric, 0.00),
+                COALESCE(NULLIF(replace(regexp_replace(superficie_de_pastos, '[^0-9,.\-]', '', 'g'), ',', '.'),'')::numeric, 0.000),
 
                 COALESCE(ROUND(NULLIF(replace(alpacas, ',', '.'), '')::numeric)::int, 0),
                 COALESCE(ROUND(NULLIF(replace(ovinos, ',', '.'), '')::numeric)::int, 0),
@@ -104,5 +105,6 @@ class CopyImporterPlantillaA
             DB::rollBack();
             throw $e;
         }
-    }
+    } 
+
 }
