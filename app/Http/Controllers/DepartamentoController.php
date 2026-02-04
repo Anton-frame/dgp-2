@@ -7,59 +7,44 @@ use Illuminate\Http\Request;
 
 class DepartamentoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        // Cache::forget("catalogos:departamentos");
+
+        $departamentos = Departamento::select('id', 'nombre')->get();
+        $formularios = Formulario::limit(9)->get(['id', 'nombre']);
+
+        return response()->json([
+            'departamentos' => $departamentos,
+            'formularios' => $formularios,
+            'analisis' => []
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function provincias(int $departamento)
     {
-        //
+        // Cache::forget("catalogos:provincias:$departamento");
+        $provincias = Provincia::where('departamento_id', $departamento)->select('id', 'departamento_id', 'nombre')->get();
+
+        return response()->json($provincias);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function distritos(int $provincia)
     {
-        //
-    }
+        // Cache::forget("catalogos:distritos:$provincia");
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Departamento $departamento)
-    {
-        //
-    }
+        $distritos = DB::table('distritos')
+                    ->where('provincia_id', $provincia)
+                    ->select(
+                        'id',
+                        'nombre',
+                        'provincia_id',
+                        'codigo',
+                        DB::raw('ST_AsGeoJSON(area)::json as area'),
+                        DB::raw('ST_AsGeoJSON(coords)::json as coords')
+                    )
+                    ->get();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Departamento $departamento)
-    {
-        //
+        return response()->json($distritos);
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Departamento $departamento)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Departamento $departamento)
-    {
-        //
-    }
-}
+} 

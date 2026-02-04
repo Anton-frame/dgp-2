@@ -9,8 +9,12 @@ class FormularioController extends Controller
 {
     public function index()
     {
-        $formularios = Formulario::get();
-        return $formularios;
+    $formularios = Formulario::limit(9)->get();
+        return response()->json([
+            'list' => $formularios,
+        ]); 
+
+
     }
 
     public function show(Formulario $formulario)

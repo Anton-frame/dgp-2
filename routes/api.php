@@ -15,12 +15,16 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/v1/login', [AuthController::class, 'login']);
 
-Route::get('v1/escenarios/show/{formulario}/pi', [EscenarioController::class, 'showPI']);
+Route::get('/v1/escenarios/show/{formulario}/pi', [EscenarioController::class, 'showPI']);
+    Route::post('/v1/escenarios/{escenario}/download', [EscenarioController::class, 'download']);
+    Route::get('/v1/departamentos', [DepartamentoController::class, 'index']);
+    Route::get('/v1/provincias/{departamento}', [DepartamentoController::class, 'provincias']);
+    Route::get('/v1/distritos/{provincia}', [DepartamentoController::class, 'distritos']);
 
 Route::group(['middleware' => ['auth:api'], 'prefix' => 'v1'], function () {
 
     // escenarios
-    Route::get('escenarios/formularios', [EscenarioController::class, 'formulariosFull']);
+  
     Route::apiResource('/escenarios', EscenarioController::class);
     Route::post('escenarios/{escenario}/plantilla/print', [EscenarioController::class, 'print']);
     Route::post('escenarios/{escenario}/plantilla/download', [EscenarioController::class, 'downloadPlantilla']);
@@ -28,13 +32,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'v1'], function () {
     // formularios
     Route::apiResource('/formularios', FormularioController::class)->only('index', 'show');
 
-    // departamentos
-    Route::apiResource('/departamentos', DepartamentoController::class)->only('index');
-    // provincias
-    Route::apiResource('/provincias', ProvinciaController::class)->only('index');
-    // distritos
-    Route::apiResource('/distritos', DistritoController::class)->only('index');
-
+    
     //usuarios
     Route::apiResource('/usuarios', UserController::class);
     Route::apiResource('/roles', RoleController::class)->only('index');
