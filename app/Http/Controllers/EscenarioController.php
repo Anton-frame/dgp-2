@@ -204,7 +204,7 @@ class EscenarioController extends Controller
         if (null === $file) {
             return "";
         }
-        return Storage::disk($acceso)->putFile('escenarios', $file);
+        return Storage::disk("public")->putFile('escenarios', $file);
     }
 
     public function deleteFile(string $path, string $acceso = 'local')
